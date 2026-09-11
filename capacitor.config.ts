@@ -5,7 +5,7 @@ const config: CapacitorConfig = {
   appName: 'WA CRM',
   webDir: 'capacitor-dist',
   server: {
-    url: 'https://wacem.netlify.app',
+    url: 'https://wacrm1.netlify.app',
     cleartext: true,
     androidScheme: 'https',
     allowNavigation: ['*'],

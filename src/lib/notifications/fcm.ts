@@ -166,16 +166,21 @@ export async function sendFcmNotification(payload: FcmMessagePayload): Promise<b
             body: payload.body,
           },
           data: {
+            title: payload.title,
+            body: payload.body,
             conversationId: payload.conversationId || '',
             url: '/inbox',
           },
           android: {
             priority: 'high',
             notification: {
+              title: payload.title,
+              body: payload.body,
               sound: 'notification',
               channel_id: 'wacrm_messages',
               notification_priority: 'PRIORITY_MAX',
               default_vibrate_timings: true,
+              default_sound: true,
               click_action: 'FCM_PLUGIN_ACTIVITY',
             },
           },
@@ -200,6 +205,14 @@ export async function sendFcmNotification(payload: FcmMessagePayload): Promise<b
         } else {
           const err = await res.text()
           console.error(`[fcm] Token send failed for ${token.slice(0, 10)}...:`, err)
+          if (res.status === 404 || err.includes('UNREGISTERED')) {
+            // Delete unregistered/stale token from Supabase
+            await getSupabaseAdmin()
+              .from('fcm_device_tokens')
+              .delete()
+              .eq('token', token)
+              .catch(() => {})
+          }
         }
       } catch (err) {
         console.error('[fcm] Error sending to token:', err)
