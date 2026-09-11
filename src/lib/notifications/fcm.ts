@@ -100,6 +100,52 @@ async function getGoogleAccessToken(sa: ServiceAccount): Promise<string | null> 
   }
 }
 
+export function parseServiceAccount(envVal: unknown): ServiceAccount | null {
+  if (!envVal) return null
+  let cur: any = envVal
+  for (let i = 0; i < 4; i++) {
+    if (typeof cur === 'object' && cur !== null) {
+      const pid = cur.project_id || cur.projectId
+      const email = cur.client_email || cur.clientEmail
+      const key = cur.private_key || cur.privateKey
+      if (pid && email && key) {
+        return { project_id: pid, client_email: email, private_key: key }
+      }
+    }
+    if (typeof cur === 'string') {
+      let trimmed = cur.trim()
+      if ((trimmed.startsWith('"') && trimmed.endsWith('"')) || (trimmed.startsWith("'") && trimmed.endsWith("'"))) {
+        trimmed = trimmed.slice(1, -1).trim()
+      }
+      try {
+        if (trimmed.startsWith('{') || trimmed.startsWith('[') || trimmed.startsWith('"') || trimmed.startsWith('\\"')) {
+          cur = JSON.parse(trimmed)
+          continue
+        }
+      } catch {}
+      try {
+        const decoded = Buffer.from(trimmed, 'base64').toString('utf8')
+        if (decoded.trim().startsWith('{')) {
+          cur = JSON.parse(decoded)
+          continue
+        }
+      } catch {}
+    }
+    break
+  }
+
+  if (typeof cur === 'object' && cur !== null) {
+    const pid = cur.project_id || cur.projectId
+    const email = cur.client_email || cur.clientEmail
+    const key = cur.private_key || cur.privateKey
+    if (pid && email && key) {
+      return { project_id: pid, client_email: email, private_key: key }
+    }
+  }
+
+  return null
+}
+
 /**
  * Send Firebase Cloud Messaging (FCM) v1 Push Notification to Android devices
  */
@@ -110,29 +156,9 @@ export async function sendFcmNotification(payload: FcmMessagePayload): Promise<b
     return false
   }
 
-  let sa: ServiceAccount
-  try {
-    let cleanEnv = typeof saEnv === 'string' ? saEnv.trim() : saEnv
-    if (typeof cleanEnv === 'string') {
-      if ((cleanEnv.startsWith('"') && cleanEnv.endsWith('"')) || (cleanEnv.startsWith("'") && cleanEnv.endsWith("'"))) {
-        cleanEnv = cleanEnv.slice(1, -1)
-      }
-      if (cleanEnv.startsWith('{')) {
-        sa = JSON.parse(cleanEnv)
-      } else {
-        const decoded = Buffer.from(cleanEnv, 'base64').toString('utf8')
-        sa = JSON.parse(decoded)
-      }
-    } else {
-      sa = cleanEnv
-    }
-  } catch (err) {
-    console.error('[fcm] Failed to parse FIREBASE_SERVICE_ACCOUNT JSON:', err)
-    return false
-  }
-
-  if (!sa.project_id || !sa.client_email || !sa.private_key) {
-    console.warn('[fcm] FIREBASE_SERVICE_ACCOUNT is missing project_id, client_email, or private_key')
+  const sa = parseServiceAccount(saEnv)
+  if (!sa || !sa.project_id || !sa.client_email || !sa.private_key) {
+    console.warn('[fcm] FIREBASE_SERVICE_ACCOUNT could not be parsed into valid credentials')
     return false
   }
 

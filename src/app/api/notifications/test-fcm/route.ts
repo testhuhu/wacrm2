@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { sendFcmNotification } from '@/lib/notifications/fcm'
+import { sendFcmNotification, parseServiceAccount } from '@/lib/notifications/fcm'
 import { createClient } from '@supabase/supabase-js'
 
 export const dynamic = 'force-dynamic'
@@ -10,22 +10,12 @@ export async function GET() {
   const saType = typeof saEnv
   const saLen = typeof saEnv === 'string' ? saEnv.length : 0
 
-  let parseError = null
-  let saInfo = null
-  if (saEnv) {
-    try {
-      const parsed = typeof saEnv === 'string' && saEnv.trim().startsWith('{')
-        ? JSON.parse(saEnv)
-        : saEnv
-      saInfo = {
-        project_id: parsed?.project_id,
-        client_email: parsed?.client_email,
-        has_private_key: !!parsed?.private_key,
-        private_key_len: parsed?.private_key ? parsed.private_key.length : 0,
-      }
-    } catch (err: any) {
-      parseError = err.message || String(err)
-    }
+  const saParsed = parseServiceAccount(saEnv)
+  const saInfo = {
+    project_id: saParsed?.project_id,
+    client_email: saParsed?.client_email,
+    has_private_key: !!saParsed?.private_key,
+    private_key_len: saParsed?.private_key ? saParsed.private_key.length : 0,
   }
 
   // Fetch device tokens
@@ -50,7 +40,7 @@ export async function GET() {
       has_FIREBASE_SERVICE_ACCOUNT: hasSa,
       sa_length: saLen,
       sa_type: saType,
-      parse_error: parseError,
+      is_valid_sa: !!saParsed,
       sa_info: saInfo,
     },
     tokens_in_db: tokens,
