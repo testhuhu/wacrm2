@@ -624,6 +624,7 @@ async function processMessage(
       accessToken,
       mirrorMedia ? { accountId } : null
     )
+  const inboundText = contentText ?? message.text?.body ?? ''
 
   // Resolve swipe-reply context if present. A missing parent is fine —
   // we just store NULL and the UI renders the message without a quote.
@@ -752,6 +753,14 @@ async function processMessage(
   // SQL — see the helper for why that matters.
   await reopenClosedConversation(supabaseAdmin(), conversation)
 
+  // Send native Android FCM Push Notification to device(s) IMMEDIATELY
+  // so the phone rings without waiting for flows, automations, or AI auto-replies.
+  await sendFcmNotification({
+    title: contactRecord.name ? `رسالة من ${contactRecord.name} 💬` : 'رسالة واتساب جديدة 💬',
+    body: inboundText || (contentType === 'image' ? '📷 أرسل صورة' : contentType === 'audio' ? '🎙️ أرسل تسجيلاً صوتياً' : '💬 رسالة جديدة'),
+    conversationId: conversation.id,
+  }).catch((err) => console.error('[webhook] FCM send error:', err))
+
   // If this contact was a recent broadcast recipient, flag the reply
   // so the broadcast's `replied_count` advances (via the aggregate
   // trigger installed in migration 003).
@@ -803,7 +812,6 @@ async function processMessage(
   // message all exist before any step — including send_message — runs.
   // Fire-and-forget: a slow or failing automation must not block the
   // webhook's 200 OK response to Meta.
-  const inboundText = contentText ?? message.text?.body ?? ''
   const automationTriggers: (
     | 'new_contact_created'
     | 'first_inbound_message'
@@ -867,13 +875,6 @@ async function processMessage(
       configOwnerUserId,
     })
   }
-
-  // Send native Android FCM Push Notification to device(s)
-  await sendFcmNotification({
-    title: contactRecord.name ? `رسالة من ${contactRecord.name} 💬` : 'رسالة واتساب جديدة 💬',
-    body: inboundText || (contentType === 'image' ? '📷 أرسل صورة' : contentType === 'audio' ? '🎙️ أرسل تسجيلاً صوتياً' : '💬 رسالة جديدة'),
-    conversationId: conversation.id,
-  }).catch((err) => console.error('[webhook] FCM send error:', err))
 
   // message.received webhook (public API). Awaited — not fire-and-forget
   // — because we're inside the route's `after()` block, which only keeps

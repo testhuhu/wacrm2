@@ -38,13 +38,6 @@ export async function POST(request: Request) {
       console.warn('[fcm] Failed to save token to database:', dbErr)
     }
 
-    // Send a welcome test push notification to verify the device connection
-    void sendFcmNotification({
-      token: cleanToken,
-      title: 'WA CRM 💬',
-      body: 'تم تفعيل واستقبال إشعارات الهاتف بنجاح! 🔔',
-    }).catch(() => {})
-
     return NextResponse.json({ success: true, registered: true })
   } catch (error) {
     console.error('[fcm] Error registering device token:', error)

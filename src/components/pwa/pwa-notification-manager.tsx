@@ -5,13 +5,13 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Capacitor } from "@capacitor/core";
 import { PushNotifications } from "@capacitor/push-notifications";
-import { LocalNotifications } from "@capacitor/local-notifications";
 import { createClient } from "@/lib/supabase/client";
 import { playChimeSound, triggerAlert } from "@/lib/notifications";
 
 export function PwaNotificationManager() {
   const router = useRouter();
   const lastAlertTimeRef = useRef<number>(0);
+  const handledMessageIdsRef = useRef<Set<string>>(new Set());
 
   useEffect(() => {
     // 1. Prime / Unlock audio on user touch or click
@@ -23,20 +23,9 @@ export function PwaNotificationManager() {
     window.addEventListener("click", unlockAudio, { passive: true });
     window.addEventListener("touchstart", unlockAudio, { passive: true });
 
-    // 2. Native Capacitor Push & Local Notifications initialization
+    // 2. Native Capacitor Push Notifications initialization
     if (Capacitor.isNativePlatform()) {
       try {
-        // Initialize LocalNotifications channel with sound & vibration
-        LocalNotifications.createChannel({
-          id: "wacrm_messages",
-          name: "رسائل واتساب الواردة",
-          description: "إشعارات الرسائل الجديدة مع الصوت والاهتزاز",
-          importance: 5,
-          visibility: 1,
-          sound: "notification.wav",
-          vibration: true,
-        }).catch(() => {});
-
         // Request FCM Push permissions
         PushNotifications.checkPermissions()
           .then((status) => {
@@ -64,11 +53,16 @@ export function PwaNotificationManager() {
         });
 
         PushNotifications.addListener("pushNotificationReceived", (notification) => {
-          triggerAlert(
-            notification.title || "رسالة واتساب جديدة 💬",
-            notification.body || "",
-            notification.data?.conversationId
-          );
+          // If the app is active in foreground when push arrives, play sound and haptics
+          const now = Date.now();
+          if (now - lastAlertTimeRef.current > 2000) {
+            lastAlertTimeRef.current = now;
+            triggerAlert(
+              notification.title || "رسالة واتساب جديدة 💬",
+              notification.body || "",
+              notification.data?.conversationId
+            );
+          }
         });
 
         PushNotifications.addListener("pushNotificationActionPerformed", () => {
@@ -97,10 +91,22 @@ export function PwaNotificationManager() {
       }
     }
 
-    const fireNotification = (bodyText: string, conversationId?: string) => {
+    const fireNotification = (messageId: string, bodyText: string, conversationId?: string) => {
+      // Check if this exact message was already alerted
+      if (handledMessageIdsRef.current.has(messageId)) {
+        return;
+      }
+      handledMessageIdsRef.current.add(messageId);
+
+      // Clean up old set entries if it grows large
+      if (handledMessageIdsRef.current.size > 100) {
+        const arr = Array.from(handledMessageIdsRef.current);
+        handledMessageIdsRef.current = new Set(arr.slice(arr.length - 50));
+      }
+
       const now = Date.now();
-      if (now - lastAlertTimeRef.current < 800) {
-        return; // debounce within 800ms
+      if (now - lastAlertTimeRef.current < 1500) {
+        return; // debounce rapid bursts within 1.5s
       }
       lastAlertTimeRef.current = now;
 
@@ -109,7 +115,7 @@ export function PwaNotificationManager() {
       // Show interactive in-app toast
       toast.info(title, {
         description: bodyText,
-        duration: 8000,
+        duration: 6000,
         action: {
           label: "فتح المحادثة",
           onClick: () => {
@@ -118,17 +124,16 @@ export function PwaNotificationManager() {
         },
       });
 
-      // Trigger Chime Sound, Vibration, and OS / Android Notification
+      // Trigger Chime Sound and Vibration
       triggerAlert(title, bodyText, conversationId);
     };
 
-    // 4. Supabase Realtime Listener
+    // 4. Supabase Realtime Listener (ONLY for new customer messages)
     const supabase = createClient();
-    const channelName = `pwa-all-alerts-${Date.now()}`;
+    const channelName = `pwa-inbound-alerts-${Date.now()}`;
     const channel = supabase.channel(channelName);
 
     channel
-      // Listen to new customer messages
       .on(
         "postgres_changes",
         {
@@ -145,6 +150,7 @@ export function PwaNotificationManager() {
             content_type?: string;
           };
 
+          // ONLY trigger alert for inbound customer messages (not bot, not agent, not system)
           if (!msg || msg.sender_type !== "customer") return;
 
           const preview =
@@ -159,30 +165,7 @@ export function PwaNotificationManager() {
                     ? "📄 أرسل العميل مستند"
                     : "💬 رسالة جديدة واردة");
 
-          fireNotification(preview, msg.conversation_id);
-        }
-      )
-      // Listen to conversations updates
-      .on(
-        "postgres_changes",
-        {
-          event: "UPDATE",
-          schema: "public",
-          table: "conversations",
-        },
-        (payload) => {
-          const conv = payload.new as {
-            id: string;
-            unread_count?: number;
-            last_message_text?: string;
-          };
-
-          if (conv && typeof conv.unread_count === "number" && conv.unread_count > 0) {
-            fireNotification(
-              conv.last_message_text || "💬 رسالة واتساب جديدة",
-              conv.id
-            );
-          }
+          fireNotification(msg.id, preview, msg.conversation_id);
         }
       )
       .subscribe((status) => {

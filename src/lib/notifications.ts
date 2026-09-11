@@ -57,11 +57,20 @@ export function playChimeSound() {
   }
 }
 
+let lastTriggerTime = 0
+
 export async function triggerAlert(
   title: string,
   body: string,
-  conversationId?: string
+  conversationId?: string,
+  options: { showLocalNotification?: boolean } = {}
 ) {
+  const now = Date.now()
+  if (now - lastTriggerTime < 1500) {
+    return // Debounce rapid back-to-back triggers within 1.5s
+  }
+  lastTriggerTime = now
+
   // 1. Sound
   playChimeSound();
 
@@ -73,27 +82,30 @@ export async function triggerAlert(
       // Ignore
     }
 
-    // 3. Native Android Local Notification
-    try {
-      await LocalNotifications.schedule({
-        notifications: [
-          {
-            title,
-            body,
-            id: Math.floor(Math.random() * 1000000),
-            channelId: "wacrm_messages",
-            sound: "notification.wav",
-            extra: {
-              conversationId,
-              url: "/inbox",
+    // 3. Native Android Local Notification (only if explicitly requested for background/offline fallback)
+    if (options.showLocalNotification) {
+      try {
+        await LocalNotifications.schedule({
+          notifications: [
+            {
+              title,
+              body,
+              id: Math.floor(Math.random() * 1000000),
+              channelId: "wacrm_messages",
+              sound: "notification.wav",
+              extra: {
+                conversationId,
+                url: "/inbox",
+              },
             },
-          },
-        ],
-      });
-      return;
-    } catch {
-      // Ignore
+          ],
+        });
+        return;
+      } catch {
+        // Ignore
+      }
     }
+    return;
   } else if (typeof navigator !== "undefined" && "vibrate" in navigator) {
     try {
       navigator.vibrate([400, 200, 400]);
