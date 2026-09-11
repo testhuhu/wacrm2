@@ -11,11 +11,20 @@ export async function GET() {
   const saLen = typeof saEnv === 'string' ? saEnv.length : 0
 
   const saParsed = parseServiceAccount(saEnv)
+  const saPreview = typeof saEnv === 'string' ? {
+    start: saEnv.slice(0, 40),
+    end: saEnv.slice(-40),
+    first_char_code: saEnv.charCodeAt(0),
+    last_char_code: saEnv.charCodeAt(saEnv.length - 1),
+    includes_private_key: saEnv.includes('private_key'),
+    includes_project_id: saEnv.includes('project_id'),
+  } : null
   const saInfo = {
     project_id: saParsed?.project_id,
     client_email: saParsed?.client_email,
     has_private_key: !!saParsed?.private_key,
     private_key_len: saParsed?.private_key ? saParsed.private_key.length : 0,
+    preview: saPreview,
   }
 
   // Fetch device tokens
