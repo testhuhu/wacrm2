@@ -1,5 +1,6 @@
 import crypto from 'crypto'
 import { createClient } from '@supabase/supabase-js'
+import { BUILTIN_FIREBASE_SERVICE_ACCOUNT } from './firebase-credentials'
 
 interface FcmMessagePayload {
   title: string
@@ -146,19 +147,26 @@ export function parseServiceAccount(envVal: unknown): ServiceAccount | null {
   return null
 }
 
+export function resolveServiceAccount(): ServiceAccount | null {
+  const envVal = process.env.FIREBASE_SERVICE_ACCOUNT
+  const parsed = parseServiceAccount(envVal)
+  if (parsed && parsed.project_id && parsed.client_email && parsed.private_key) {
+    return parsed
+  }
+  // Fallback to built-in credentials
+  if (BUILTIN_FIREBASE_SERVICE_ACCOUNT && BUILTIN_FIREBASE_SERVICE_ACCOUNT.project_id) {
+    return BUILTIN_FIREBASE_SERVICE_ACCOUNT as unknown as ServiceAccount
+  }
+  return null
+}
+
 /**
  * Send Firebase Cloud Messaging (FCM) v1 Push Notification to Android devices
  */
 export async function sendFcmNotification(payload: FcmMessagePayload): Promise<boolean> {
-  const saEnv = process.env.FIREBASE_SERVICE_ACCOUNT
-  if (!saEnv) {
-    console.warn('[fcm] FIREBASE_SERVICE_ACCOUNT is not set in environment variables')
-    return false
-  }
-
-  const sa = parseServiceAccount(saEnv)
+  const sa = resolveServiceAccount()
   if (!sa || !sa.project_id || !sa.client_email || !sa.private_key) {
-    console.warn('[fcm] FIREBASE_SERVICE_ACCOUNT could not be parsed into valid credentials')
+    console.warn('[fcm] No valid Firebase service account found')
     return false
   }
 
