@@ -118,6 +118,9 @@ export function parseServiceAccount(envVal: unknown): ServiceAccount | null {
       if ((trimmed.startsWith('"') && trimmed.endsWith('"')) || (trimmed.startsWith("'") && trimmed.endsWith("'"))) {
         trimmed = trimmed.slice(1, -1).trim()
       }
+      if (!trimmed.startsWith('{') && trimmed.includes('project_id')) {
+        trimmed = '{' + trimmed + '}'
+      }
       try {
         if (trimmed.startsWith('{') || trimmed.startsWith('[') || trimmed.startsWith('"') || trimmed.startsWith('\\"')) {
           cur = JSON.parse(trimmed)
@@ -126,8 +129,12 @@ export function parseServiceAccount(envVal: unknown): ServiceAccount | null {
       } catch {}
       try {
         const decoded = Buffer.from(trimmed, 'base64').toString('utf8')
-        if (decoded.trim().startsWith('{')) {
-          cur = JSON.parse(decoded)
+        let decTrimmed = decoded.trim()
+        if (!decTrimmed.startsWith('{') && decTrimmed.includes('project_id')) {
+          decTrimmed = '{' + decTrimmed + '}'
+        }
+        if (decTrimmed.startsWith('{')) {
+          cur = JSON.parse(decTrimmed)
           continue
         }
       } catch {}
