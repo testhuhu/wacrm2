@@ -26,10 +26,30 @@ export function PwaNotificationManager() {
     // 2. Native Capacitor Push Notifications initialization
     if (Capacitor.isNativePlatform()) {
       try {
+        // Initialize Notification Channels on Android
+        PushNotifications.createChannel({
+          id: "wacrm_messages",
+          name: "رسائل واتساب الواردة",
+          description: "إشعارات الرسائل الجديدة مع الصوت والاهتزاز",
+          importance: 5,
+          visibility: 1,
+          sound: "notification.wav",
+          vibration: true,
+        }).catch(() => {});
+
+        PushNotifications.createChannel({
+          id: "default",
+          name: "عام",
+          description: "إشعارات عامة",
+          importance: 5,
+          visibility: 1,
+          vibration: true,
+        }).catch(() => {});
+
         // Request FCM Push permissions
         PushNotifications.checkPermissions()
           .then((status) => {
-            if (status.receive === "prompt") {
+            if (status.receive !== "granted") {
               return PushNotifications.requestPermissions();
             }
             return status;

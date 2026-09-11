@@ -112,9 +112,20 @@ export async function sendFcmNotification(payload: FcmMessagePayload): Promise<b
 
   let sa: ServiceAccount
   try {
-    sa = typeof saEnv === 'string' && saEnv.trim().startsWith('{')
-      ? JSON.parse(saEnv)
-      : saEnv
+    let cleanEnv = typeof saEnv === 'string' ? saEnv.trim() : saEnv
+    if (typeof cleanEnv === 'string') {
+      if ((cleanEnv.startsWith('"') && cleanEnv.endsWith('"')) || (cleanEnv.startsWith("'") && cleanEnv.endsWith("'"))) {
+        cleanEnv = cleanEnv.slice(1, -1)
+      }
+      if (cleanEnv.startsWith('{')) {
+        sa = JSON.parse(cleanEnv)
+      } else {
+        const decoded = Buffer.from(cleanEnv, 'base64').toString('utf8')
+        sa = JSON.parse(decoded)
+      }
+    } else {
+      sa = cleanEnv
+    }
   } catch (err) {
     console.error('[fcm] Failed to parse FIREBASE_SERVICE_ACCOUNT JSON:', err)
     return false
@@ -176,7 +187,7 @@ export async function sendFcmNotification(payload: FcmMessagePayload): Promise<b
             notification: {
               title: payload.title,
               body: payload.body,
-              sound: 'notification',
+              sound: 'default',
               channel_id: 'wacrm_messages',
               notification_priority: 'PRIORITY_MAX',
               default_vibrate_timings: true,
