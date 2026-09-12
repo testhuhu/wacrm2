@@ -297,6 +297,19 @@
       "resumed": "AI가 재개되었습니다.",
       "updateError": "AI 어시스턴트를 업데이트하지 못했습니다.",
       "networkError": "서버에 연결할 수 없습니다."
+    },
+    "toasts": {
+      "aiNotConfigured": "AI isn't set up yet — enable it in Settings → AI Assistant.",
+      "aiNoReply": "The assistant didn't return a reply.",
+      "aiUnreachable": "Couldn't reach the AI assistant.",
+      "recordingTooLong": "Recording is too long (over 16 MB).",
+      "voiceNotSupported": "Voice recording isn't supported in this browser.",
+      "micAccessDenied": "Microphone access denied or unavailable.",
+      "sendFailed": "Failed to send: {reason}",
+      "sendTemplateFailed": "Failed to send template: {reason}",
+      "waitSending": "Wait for the message to finish sending",
+      "reactionFailed": "Reaction failed: {reason}",
+      "assignFailed": "Failed to update assignment"
     }
   },
   "Contacts": {
@@ -751,7 +764,10 @@
         "errorLoadTags": "태그를 불러오지 못했습니다",
         "errorLoadFields": "커스텀 필드를 불러오지 못했습니다",
         "errorCsvParse": "CSV 파일을 파싱할 수 없습니다.",
-        "errorCsvMissingPhone": "CSV에 'phone' 열이 있어야 합니다."
+        "errorCsvMissingPhone": "CSV에 'phone' 열이 있어야 합니다.",
+        "audienceSummary": "대상 요약",
+        "calculating": "계산 중…",
+        "estimatedRecipients": "예상 수신자"
       },
       "personalize": {
         "title": "변수 개인화",
@@ -799,8 +815,15 @@
         "sending": "전송 중...",
         "preparing": "준비 중...",
         "progressDesc": "수신자 {total}명 중 {current}명 처리 중...",
-        "toastFailedPreview": "미리보기 데이터를 불러오지 못했습니다"
+        "toastFailedPreview": "미리보기 데이터를 불러오지 못했습니다",
+        "estimatedReach": "예상 도달 범위",
+        "language": "언어",
+        "confirmTitle": "브로드캐스트 확인",
+        "confirmDesc": "{template} 템플릿을 사용하여 {count}명의 연락처에 브로드캐스트를 전송합니다. 이 작업은 취소할 수 없습니다."
       }
+    },
+    "personalizeExtra": {
+      "enterValue": "Enter value..."
     }
   },
   "Automations": {
@@ -1012,6 +1035,11 @@
         "matchExact": "정확히 일치",
         "closeConversationHint": "대화 상태를 \"닫힘\"으로 설정합니다. 추가 설정이 필요 없습니다."
       }
+    },
+    "builderExtra": {
+      "schedulePlaceholder": "Cron expression or HH:mm",
+      "moveUp": "Move up",
+      "moveDown": "Move down"
     }
   },
   "Flows": {
@@ -1234,6 +1262,28 @@
       "modeRemove": "제거",
       "tagPicked": "{tag} 태그 {mode}…",
       "tagNone": "태그 {mode} (선택된 태그 없음)"
+    },
+    "header": {
+      "backToFlows": "Back to Flows",
+      "flowNamePlaceholder": "Flow name",
+      "flowNameAria": "Flow name",
+      "edited": "Edited",
+      "unsavedTitle": "Unsaved changes — hit Save to persist",
+      "runs": "Runs",
+      "delete": "Delete",
+      "pause": "Pause",
+      "activate": "Activate",
+      "fixIssuesTitle": "Fix the issues below before activating",
+      "save": "Save",
+      "descPlaceholder": "Add a short description (internal — customers don't see this)",
+      "descAria": "Flow description",
+      "draftStatus": "Draft",
+      "activeStatus": "Active",
+      "archivedStatus": "Archived"
+    },
+    "extra": {
+      "fileUploaded": "File uploaded.",
+      "removeSection": "Remove section"
     }
   },
   "Settings": {
@@ -1369,13 +1419,11 @@
       "deleteLocallyAria": "로컬에서 템플릿 삭제",
       "deleteMetaLocallyTitle": "Meta와 로컬에서 삭제",
       "deleteLocallyTitle": "로컬에서 삭제",
-
       "dialogEditTitle": "메시지 템플릿 수정",
       "dialogNewTitle": "새 메시지 템플릿",
       "dialogEditDesc": "변경 사항을 저장해 Meta에 재제출하세요. 검토 중에는 상태가 다시 대기 중으로 바뀝니다.",
       "dialogNewDesc": "템플릿을 만들어 Meta 승인을 요청하세요. 승인되면 브로드캐스트와 인박스에서 사용할 수 있습니다.",
       "authWarning": "AUTHENTICATION 템플릿은 본문과 OTP 버튼 형식이 고정되어 있어 별도의 빌더가 필요합니다. 지금은 Meta WhatsApp 관리자에서 만든 뒤 <bold>Meta에서 동기화</bold>로 가져오세요.",
-
       "templateName": "템플릿 이름",
       "namePlaceholder": "예: order_confirmation",
       "nameFixed": "템플릿이 Meta에 존재하면 이름이 고정됩니다 — 변경하려면 새 템플릿을 만드세요.",
@@ -1384,7 +1432,6 @@
       "language": "언어",
       "langFixed": "템플릿이 Meta에 존재하면 언어가 고정됩니다.",
       "langHint": "Meta의 정확한 코드와 일치해야 합니다 — <code>en_US</code>와 <code>en</code>은 다른 코드입니다.",
-
       "header": "헤더",
       "headerNone": "없음",
       "headerText": "텍스트",
@@ -1394,7 +1441,6 @@
       "headerTextPlaceholder": "헤더 텍스트 (최대 60자, {{1}} 선택 가능)",
       "headerSampleAria": "헤더 변수 샘플 값",
       "headerSamplePlaceholder": "{{1}}의 샘플 값 (Meta 검토에 필요)",
-
       "uploadImage": "이미지 업로드",
       "uploadHint": "JPEG 또는 PNG, 5MB 이하",
       "mediaUrlPlaceholder": "https://… (또는 공개 {format} 링크 붙여넣기)",
@@ -1402,17 +1448,14 @@
       "mediaHint": "공개적으로 접근 가능한 HTTPS 링크여야 합니다. Meta가 검토 중 한 번 가져오므로 약 24시간 동안 살아있어야 합니다.",
       "videoHint": " 권장: MP4 / 3GPP, 16MB 이하, 60초 이하.",
       "documentHint": " 권장: PDF, 100MB 이하.",
-
       "bodyText": "본문 텍스트",
       "bodyPlaceholder": "안녕하세요 {{1}}님, 주문 {{2}}이(가) 확정되었습니다.",
       "sampleValues": "샘플 값 (Meta가 템플릿 검토에 사용합니다)",
       "bodyHint": "변수에는 {{1}}, {{2}}를 사용하세요 ({{1}}부터 연속되어야 합니다).",
       "sampleAria": "본문 변수 {var}의 샘플 값",
       "samplePlaceholder": "{var}의 샘플",
-
       "footer": "푸터 (선택)",
       "footerPlaceholder": "선택적 푸터 텍스트 (최대 60자)",
-
       "buttons": "버튼 (선택)",
       "addButton": "버튼 추가",
       "buttonsLimit": "최대 {max}개 버튼. QUICK_REPLY 버튼은 URL / 전화 / 코드 복사 버튼보다 앞에 와야 합니다.",
@@ -1425,19 +1468,16 @@
       "urlSamplePlaceholder": "{{1}}의 예시 값 (URL에 변수가 있을 때 필요)",
       "phonePlaceholder": "+15551234567",
       "codePlaceholder": "예시 코드 (예: SUMMER20)",
-
       "cancel": "취소",
       "saving": "저장 중…",
       "submitting": "제출 중…",
       "saveResubmit": "저장 & 재제출",
       "submitApproval": "승인 요청",
-
       "deleteDialogTitle": "템플릿을 삭제하시겠습니까?",
       "deleteMetaDesc": "\"{name}\"이(가) Meta와 wacrm에서 삭제됩니다. 이 템플릿을 사용하는 활성 브로드캐스트는 다음 전송부터 실패하기 시작합니다. 되돌릴 수 없습니다.",
       "deleteLocalDesc": "\"{name}\"이(가) wacrm에서 삭제됩니다. Meta에 제출된 적이 없으므로 별도의 원격 정리가 필요하지 않습니다.",
       "deleting": "삭제 중…",
       "delete": "삭제",
-
       "toastLoadFailed": "템플릿을 불러오지 못했습니다",
       "toastSubmitFailed": "제출하지 못했습니다",
       "toastSubmitEditSuccess": "수정 사항이 제출되었습니다 — Meta는 보통 24시간 이내에 검토합니다.",
@@ -1583,7 +1623,6 @@
       "profileSaved": "프로필이 저장되었습니다",
       "emailChangeFailed": "이메일 변경 실패: {message}",
       "profileSavedEmailCheck": "프로필이 저장되었습니다 — 이메일 주소 변경을 확인하려면 이메일을 확인하세요",
-
       "passwordTitle": "비밀번호",
       "passwordDesc": "최소 {min}자 이상 사용하세요. 변경 후에도 이 기기에서는 로그인이 유지됩니다.",
       "currentPassword": "현재 비밀번호",
@@ -1597,7 +1636,6 @@
       "currentPasswordIncorrect": "현재 비밀번호가 올바르지 않습니다",
       "passwordUpdateFailed": "비밀번호 업데이트 실패: {message}",
       "passwordUpdated": "비밀번호가 업데이트되었습니다",
-
       "sessionsTitle": "활성 세션",
       "sessionsDesc": "이 기기를 포함해 로그인되어 있는 모든 기기에서 로그아웃합니다. 노트북을 분실했거나 비밀번호를 공유한 경우 유용합니다.",
       "signOutAll": "모든 기기에서 로그아웃",
@@ -1737,6 +1775,202 @@
       "reindex": "재색인",
       "reindexTooltip": "모든 문서를 다시 임베딩합니다 (예: 임베딩 키 추가 후)",
       "loading": "불러오는 중…"
+    },
+    "whatsappToasts": {
+      "loadFailed": "Failed to load WhatsApp configuration",
+      "phoneIdRequired": "Phone Number ID is required",
+      "tokenRequired": "Access Token is required for initial setup",
+      "tokenReenter": "Please re-enter the Access Token to save changes",
+      "saveFailed": "Failed to save configuration",
+      "connTestFailed": "Connection test failed. Check network and try again.",
+      "numberWired": "Number is fully wired — Meta is delivering events.",
+      "verificationUnreachable": "Could not reach the verification endpoint.",
+      "configCleared": "Configuration cleared. You can now re-enter your credentials.",
+      "resetFailed": "Failed to reset configuration",
+      "webhookCopied": "Webhook URL copied to clipboard"
+    },
+    "membersToasts": {
+      "serverUnreachable": "Could not reach the server. Try again?",
+      "loadInvitationsFailed": "Failed to load invitations",
+      "updateRoleFailed": "Failed to update role",
+      "removeMemberFailed": "Failed to remove member",
+      "revokeInviteFailed": "Failed to revoke invitation"
+    }
+  },
+  "Common": {
+    "loading": "Loading...",
+    "openMenu": "Open menu"
+  },
+  "SignupPage": {
+    "titleWelcome": "Create account",
+    "titleAccept": "Create account & join",
+    "descWelcome": "Get started with CRM Template for WhatsApp",
+    "descAccept": "Verify your email, then accept the invitation to join your team.",
+    "checkEmailTitle": "Check your email",
+    "checkEmailDesc": "We've sent a confirmation link to {email}. Please check your inbox and click the link to verify your account.",
+    "backToSignIn": "Back to sign in",
+    "fullNameLabel": "Full name",
+    "fullNamePlaceholder": "John Doe",
+    "emailLabel": "Email",
+    "emailPlaceholder": "you@example.com",
+    "passwordLabel": "Password",
+    "passwordPlaceholder": "At least 6 characters",
+    "confirmPasswordLabel": "Confirm password",
+    "confirmPasswordPlaceholder": "Repeat your password",
+    "creatingAccount": "Creating account...",
+    "createAccount": "Create account",
+    "hasAccount": "Already have an account?",
+    "signIn": "Sign in",
+    "errorMismatch": "Passwords do not match",
+    "errorTooShort": "Password must be at least 6 characters"
+  },
+  "ForgotPasswordPage": {
+    "title": "Reset password",
+    "description": "Enter your email and we'll send you a reset link",
+    "emailLabel": "Email",
+    "emailPlaceholder": "you@example.com",
+    "sendLink": "Send reset link",
+    "sending": "Sending...",
+    "backToSignIn": "Back to sign in",
+    "checkEmailTitle": "Check your email",
+    "checkEmailDesc": "We've sent a password reset link to {email}. Please check your inbox."
+  },
+  "Notifications": {
+    "title": "Notifications",
+    "description": "Conversations other teammates assign to you show up here.",
+    "markAllRead": "Mark all as read",
+    "noNotifications": "No notifications yet",
+    "noNotificationsHint": "You'll see an alert here when someone assigns you a conversation.",
+    "toastMarkReadFailed": "Failed to mark notification as read",
+    "toastMarkAllFailed": "Failed to mark all as read",
+    "retry": "Retry",
+    "unreadAria": "Unread"
+  },
+  "Agents": {
+    "title": "AI Agents",
+    "description": "Your bring-your-own-key AI agent — set it up, then test it in the playground before it replies to customers in the inbox.",
+    "tabs": {
+      "playground": "Playground",
+      "setup": "Setup",
+      "usage": "Usage"
+    },
+    "playground": {
+      "title": "Playground",
+      "subtitle": "— test replies as if you were a customer",
+      "reset": "Reset",
+      "emptyTitle": "Send a message to see how your agent would reply.",
+      "emptyDesc": "It uses your knowledge base and behaves exactly like the auto-reply bot — including handoff.",
+      "goToSetup": "Not set up yet? Go to Setup",
+      "handoffNote": "Would hand off to a human here",
+      "thinking": "Thinking…",
+      "inputPlaceholder": "Type a customer message…",
+      "toastNotConfigured": "No agent configured yet — finish Setup first.",
+      "toastNoReply": "Couldn't get a reply.",
+      "toastUnreachable": "Couldn't reach the agent."
+    },
+    "usage": {
+      "title": "Token usage",
+      "description": "Tokens spent on your provider key by drafts and the auto-reply bot. Counts only — no message content is stored here.",
+      "lastDays": "Last {days} days",
+      "noUsage": "No AI usage in the last {days} days yet.",
+      "noUsageHint": "This fills in as the assistant drafts and auto-replies.",
+      "totalTokens": "Total tokens",
+      "llmCalls": "LLM calls",
+      "autoReply": "Auto-reply",
+      "drafts": "Drafts",
+      "tokensPerDay": "Tokens per day",
+      "byModel": "By model",
+      "truncated": "Showing a partial window — usage is high enough that only the most recent records are summarized here.",
+      "callCount": "{count} {count, plural, =1 {call} other {calls}}",
+      "toastLoadFailed": "Failed to load usage"
+    }
+  },
+  "Join": {
+    "verifying": "Verifying invitation…",
+    "title": "You're invited to {accountName}",
+    "invitedAs": "You'll join as {role}. Link valid until {date}.",
+    "roleAdmin": "Admin",
+    "roleAgent": "Agent",
+    "roleViewer": "Viewer",
+    "accept": "Accept invitation",
+    "accepting": "Accepting…",
+    "acceptNotice": "Accepting moves your login into {accountName}. Your empty personal account from signup will be cleaned up.",
+    "createAndJoin": "Create account & join",
+    "haveAccount": "I already have an account",
+    "welcomeToast": "Welcome to the team",
+    "conflictTitle": "Can't join {accountName} with this account",
+    "conflictDefault": "You are already in another account. Sign in with a different email to join this one.",
+    "conflictHint": "To join {accountName}, sign out and sign up again with a different email address. The invite link stays valid as long as it hasn't expired.",
+    "staySignedIn": "Stay signed in",
+    "signOutDifferent": "Sign out & use a different email",
+    "signingOut": "Signing out…",
+    "tryAgain": "Try again",
+    "createAccountInstead": "Create a new account instead",
+    "signIn": "Sign in",
+    "toastRedeemFailed": "Failed to accept invitation",
+    "toastUnreachable": "Could not reach the server",
+    "toastSignOutFailed": "Could not sign out. Try refreshing the page.",
+    "errors": {
+      "notFoundTitle": "Invite not found",
+      "notFoundBody": "This link doesn't match a valid invitation. Double-check the URL or ask the person who invited you to send a new one.",
+      "usedTitle": "Invite already used",
+      "usedBody": "This invitation has already been accepted. If that wasn't you, ask the account admin to send a fresh link.",
+      "expiredTitle": "Invite expired",
+      "expiredBody": "This invitation has expired. Ask the account admin to send a new one — they take a few seconds to generate.",
+      "serverErrorTitle": "Something went wrong",
+      "serverErrorBody": "We couldn't verify this invitation right now. Try refreshing the page in a moment."
+    }
+  },
+  "QuickReplies": {
+    "title": "Quick replies",
+    "description": "Reusable snippets — plain text or a saved interactive message — that agents can insert from the inbox composer.",
+    "newBtn": "New quick reply",
+    "empty": "No quick replies yet. Create one to reuse it across conversations.",
+    "editTitle": "Edit quick reply",
+    "createTitle": "New quick reply",
+    "nameLabel": "Name",
+    "namePlaceholder": "e.g. Business hours",
+    "tabText": "Text",
+    "tabInteractive": "Interactive",
+    "textPlaceholder": "The message text to insert",
+    "cancel": "Cancel",
+    "save": "Save",
+    "deleteConfirm": "Delete this quick reply?",
+    "toastNameRequired": "Give the quick reply a name.",
+    "toastSaved": "Quick reply updated.",
+    "toastCreated": "Quick reply created.",
+    "toastSaveFailed": "Couldn't save the quick reply.",
+    "toastDeleted": "Quick reply deleted.",
+    "toastDeleteFailed": "Couldn't delete the quick reply."
+  },
+  "Interactive": {
+    "preview": {
+      "messageBody": "Message body…",
+      "header": "Header",
+      "footer": "Footer",
+      "interactiveMessage": "Interactive message",
+      "button": "Button",
+      "menu": "Menu"
+    },
+    "builder": {
+      "replyButtons": "Reply buttons",
+      "list": "List",
+      "body": "Body",
+      "bodyPlaceholder": "What the customer reads above the options",
+      "headerLabel": "Header (optional)",
+      "footerLabel": "Footer (optional)",
+      "showReplyIds": "Show reply IDs (advanced)",
+      "preview": "Preview",
+      "buttonsCount": "Buttons ({count}/{max})",
+      "btnTitlePlaceholder": "Button label",
+      "addButton": "Add button",
+      "listButtonLabel": "List button label",
+      "rowsCount": "Rows ({count}/{max})",
+      "sectionTitlePlaceholder": "Section title (optional)",
+      "rowTitlePlaceholder": "Row title",
+      "rowDescPlaceholder": "Description (optional)",
+      "addRow": "Add row",
+      "addSection": "Add section"
     }
   }
 }
