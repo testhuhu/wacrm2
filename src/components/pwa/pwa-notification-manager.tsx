@@ -14,9 +14,26 @@ export function PwaNotificationManager() {
   const handledMessageIdsRef = useRef<Set<string>>(new Set());
 
   useEffect(() => {
-    // 1. Prime / Unlock audio on user touch or click
+    // 1. Prime / Unlock audio silently on user touch or click to satisfy browser autoplay policy
     const unlockAudio = () => {
-      playChimeSound();
+      try {
+        const AudioCtx =
+          window.AudioContext ||
+          (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+        if (AudioCtx) {
+          const ctx = new AudioCtx();
+          if (ctx.state === "suspended") {
+            ctx.resume().catch(() => {});
+          }
+          const buffer = ctx.createBuffer(1, 1, 22050);
+          const source = ctx.createBufferSource();
+          source.buffer = buffer;
+          source.connect(ctx.destination);
+          source.start(0);
+        }
+      } catch {
+        // Ignore
+      }
       window.removeEventListener("click", unlockAudio);
       window.removeEventListener("touchstart", unlockAudio);
     };

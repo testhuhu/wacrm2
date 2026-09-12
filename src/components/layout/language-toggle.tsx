@@ -1,7 +1,8 @@
 "use client";
 
+import { useState } from "react";
 import { useLocale } from "next-intl";
-import { Globe, Check } from "lucide-react";
+import { Globe, Check, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   DropdownMenu,
@@ -44,20 +45,26 @@ const LANGUAGES: LanguageOption[] = [
 
 export function LanguageToggle({ className }: { className?: string }) {
   const currentLocale = useLocale() || "ar";
+  const [isSwitching, setIsSwitching] = useState<string | null>(null);
 
   const handleSelectLanguage = async (locale: string) => {
-    if (locale === currentLocale) return;
+    if (locale === currentLocale || isSwitching) return;
+    setIsSwitching(locale);
 
-    // Set cookie on client immediately
-    const maxAge = 365 * 24 * 60 * 60;
-    document.cookie = `NEXT_LOCALE=${locale}; path=/; max-age=${maxAge}; SameSite=Lax`;
-    document.cookie = `wacrm_locale=${locale}; path=/; max-age=${maxAge}; SameSite=Lax`;
+    const maxAge = 365 * 24 * 60 * 60; // 1 year
+    const isSecure = typeof window !== "undefined" && window.location.protocol === "https:";
+
+    // 1. Set cookies on client immediately
+    document.cookie = `NEXT_LOCALE=${locale}; path=/; max-age=${maxAge}; SameSite=Lax${isSecure ? "; Secure" : ""}`;
+    document.cookie = `wacrm_locale=${locale}; path=/; max-age=${maxAge}; SameSite=Lax${isSecure ? "; Secure" : ""}`;
+
+    // 2. Persist to localStorage
     try {
       localStorage.setItem("NEXT_LOCALE", locale);
       localStorage.setItem("wacrm_locale", locale);
     } catch {}
 
-    // Also persist via server-side cookie endpoint
+    // 3. Persist via server-side cookie endpoint
     try {
       await fetch('/api/locale', {
         method: 'POST',
@@ -66,7 +73,7 @@ export function LanguageToggle({ className }: { className?: string }) {
       });
     } catch {}
 
-    // Reload so Server & Client components apply the new locale and RTL/LTR direction
+    // 4. Force reload so Server & Client components re-render with new locale and direction
     window.location.reload();
   };
 
@@ -82,27 +89,40 @@ export function LanguageToggle({ className }: { className?: string }) {
         aria-label="تغيير اللغة / Change Language / Dil Değiştir"
         title="تغيير اللغة / Language / Dil"
       >
-        <Globe className="h-4 w-4" />
+        {isSwitching ? (
+          <Loader2 className="h-4 w-4 animate-spin text-primary" />
+        ) : (
+          <Globe className="h-4 w-4" />
+        )}
         <span className="hidden sm:inline">{activeLang.flag}</span>
         <span className="hidden sm:inline font-semibold">{activeLang.nativeName}</span>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" sideOffset={6} className="min-w-40 bg-popover text-popover-foreground">
+      <DropdownMenuContent
+        align={currentLocale === "ar" ? "start" : "end"}
+        sideOffset={6}
+        className="min-w-44 bg-popover text-popover-foreground p-1 shadow-lg border border-border"
+      >
         {LANGUAGES.map((lang) => {
           const isSelected = lang.code === currentLocale;
+          const isPending = isSwitching === lang.code;
           return (
             <DropdownMenuItem
               key={lang.code}
               onClick={() => handleSelectLanguage(lang.code)}
               className={cn(
-                "flex items-center justify-between gap-3 cursor-pointer py-2 px-3",
-                isSelected && "bg-accent/70 font-semibold text-accent-foreground"
+                "flex items-center justify-between gap-3 cursor-pointer py-2.5 px-3 rounded-md transition-colors",
+                isSelected && "bg-accent/80 font-semibold text-accent-foreground"
               )}
             >
-              <div className="flex items-center gap-2">
-                <span className="text-base">{lang.flag}</span>
+              <div className="flex items-center gap-2.5">
+                <span className="text-base leading-none">{lang.flag}</span>
                 <span className="text-sm">{lang.nativeName}</span>
               </div>
-              {isSelected && <Check className="h-4 w-4 text-primary" />}
+              {isPending ? (
+                <Loader2 className="h-4 w-4 animate-spin text-primary" />
+              ) : isSelected ? (
+                <Check className="h-4 w-4 text-primary" />
+              ) : null}
             </DropdownMenuItem>
           );
         })}

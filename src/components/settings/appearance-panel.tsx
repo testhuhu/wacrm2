@@ -1,6 +1,8 @@
 "use client";
 
-import { Check, Moon, Palette, SunMoon, Sun } from "lucide-react";
+import { useState } from "react";
+import { Check, Globe, Loader2, Moon, Palette, SunMoon, Sun } from "lucide-react";
+import { useLocale } from "next-intl";
 
 import { useTheme } from "@/hooks/use-theme";
 import { MODES, THEMES, type Mode, type ThemeId } from "@/lib/themes";
@@ -8,21 +10,73 @@ import { cn } from "@/lib/utils";
 import { useTranslations } from "next-intl";
 import { SettingsPanelHead } from "./settings-panel-head";
 
-/**
- * Appearance panel — light/dark mode + accent-color picker.
- *
- * Two independent controls: a mode toggle (light / dark) and the
- * accent grid. Either applies + persists immediately. No save button:
- * each change is a single attribute swap on <html>, there's nothing
- * to roll back.
- *
- * Persistence: localStorage only (device-scoped). The boot script in
- * layout.tsx replays both choices before first paint on subsequent
- * loads.
- */
+interface LanguageOption {
+  code: string;
+  name: string;
+  nativeName: string;
+  flag: string;
+  dir: "rtl" | "ltr";
+}
+
+const LANGUAGES: LanguageOption[] = [
+  {
+    code: "ar",
+    name: "Arabic",
+    nativeName: "العربية",
+    flag: "🇸🇦",
+    dir: "rtl",
+  },
+  {
+    code: "tr",
+    name: "Turkish",
+    nativeName: "Türkçe",
+    flag: "🇹🇷",
+    dir: "ltr",
+  },
+  {
+    code: "en",
+    name: "English",
+    nativeName: "English",
+    flag: "🇺🇸",
+    dir: "ltr",
+  },
+];
+
 export function AppearancePanel() {
   const { theme, setTheme, mode, setMode } = useTheme();
+  const currentLocale = useLocale() || "ar";
+  const [switchingLocale, setSwitchingLocale] = useState<string | null>(null);
   const t = useTranslations("Settings.appearance");
+
+  const handleSelectLanguage = async (locale: string) => {
+    if (locale === currentLocale || switchingLocale) return;
+    setSwitchingLocale(locale);
+
+    const maxAge = 365 * 24 * 60 * 60; // 1 year
+    const isSecure = typeof window !== "undefined" && window.location.protocol === "https:";
+
+    // 1. Set cookies on client immediately
+    document.cookie = `NEXT_LOCALE=${locale}; path=/; max-age=${maxAge}; SameSite=Lax${isSecure ? "; Secure" : ""}`;
+    document.cookie = `wacrm_locale=${locale}; path=/; max-age=${maxAge}; SameSite=Lax${isSecure ? "; Secure" : ""}`;
+
+    // 2. Persist to localStorage
+    try {
+      localStorage.setItem("NEXT_LOCALE", locale);
+      localStorage.setItem("wacrm_locale", locale);
+    } catch {}
+
+    // 3. Persist via server-side cookie endpoint
+    try {
+      await fetch("/api/locale", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ locale }),
+      });
+    } catch {}
+
+    // 4. Force reload so Server & Client components re-render with new locale and direction
+    window.location.reload();
+  };
 
   return (
     <section className="max-w-3xl animate-in fade-in-50 duration-200">
@@ -31,7 +85,65 @@ export function AppearancePanel() {
         description={t("description")}
       />
 
+      {/* Language Section */}
       <div className="space-y-4">
+        <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground">
+          <Globe className="size-4 text-muted-foreground" />
+          {t("language")}
+        </h3>
+        <p className="text-xs text-muted-foreground">
+          {t("languageDescription")}
+        </p>
+
+        <div
+          role="radiogroup"
+          aria-label={t("language")}
+          className="grid grid-cols-1 gap-3 sm:grid-cols-3"
+        >
+          {LANGUAGES.map((lang) => {
+            const isActive = lang.code === currentLocale;
+            const isPending = switchingLocale === lang.code;
+            return (
+              <button
+                key={lang.code}
+                type="button"
+                role="radio"
+                onClick={() => handleSelectLanguage(lang.code)}
+                aria-checked={isActive}
+                aria-label={t("useLanguage", { name: lang.nativeName })}
+                className={cn(
+                  "flex items-center justify-between gap-3 rounded-lg border bg-card p-4 text-left transition-colors cursor-pointer",
+                  isActive
+                    ? "border-primary/60 ring-2 ring-primary/40 bg-primary/5"
+                    : "border-border hover:border-border hover:bg-muted/40",
+                )}
+              >
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl leading-none">{lang.flag}</span>
+                  <div>
+                    <div className="text-sm font-semibold text-foreground">
+                      {lang.nativeName}
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      {lang.name}
+                    </div>
+                  </div>
+                </div>
+                {isPending ? (
+                  <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                ) : isActive ? (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-primary/15 px-2 py-0.5 text-[11px] font-medium text-primary">
+                    <Check className="h-3 w-3" />
+                    {t("active")}
+                  </span>
+                ) : null}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="mt-8 space-y-4">
         <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground">
           <SunMoon className="size-4 text-muted-foreground" />
           {t("mode")}

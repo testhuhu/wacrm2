@@ -1649,6 +1649,9 @@
     "appearance": {
       "title": "Appearance",
       "description": "Set the mode and accent colour used across the app. Saved to this device — try it, it changes live.",
+      "language": "Language",
+      "languageDescription": "Select your preferred interface language across the CRM.",
+      "useLanguage": "Switch to {name}",
       "mode": "Mode",
       "useMode": "Use {mode} mode",
       "active": "Active",

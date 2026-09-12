@@ -1649,6 +1649,9 @@
     "appearance": {
       "title": "Görünüm",
       "description": "Uygulama genelinde kullanılan modu ve vurgu rengini ayarlayın. Canlı olarak değişir.",
+      "language": "Görüntüleme Dili",
+      "languageDescription": "CRM genelinde tercih ettiğiniz arayüz dilini seçin.",
+      "useLanguage": "{name} diline geç",
       "mode": "Mod",
       "useMode": "{mode} modunu kullan",
       "active": "Aktif",
