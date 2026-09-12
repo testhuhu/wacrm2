@@ -45,15 +45,25 @@ const LANGUAGES: LanguageOption[] = [
 export function LanguageToggle({ className }: { className?: string }) {
   const currentLocale = useLocale() || "ar";
 
-  const handleSelectLanguage = (locale: string) => {
+  const handleSelectLanguage = async (locale: string) => {
     if (locale === currentLocale) return;
 
-    // Set cookie for 1 year
+    // Set cookie on client immediately
     const maxAge = 365 * 24 * 60 * 60;
     document.cookie = `NEXT_LOCALE=${locale}; path=/; max-age=${maxAge}; SameSite=Lax`;
     document.cookie = `wacrm_locale=${locale}; path=/; max-age=${maxAge}; SameSite=Lax`;
     try {
       localStorage.setItem("NEXT_LOCALE", locale);
+      localStorage.setItem("wacrm_locale", locale);
+    } catch {}
+
+    // Also persist via server-side cookie endpoint
+    try {
+      await fetch('/api/locale', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ locale }),
+      });
     } catch {}
 
     // Reload so Server & Client components apply the new locale and RTL/LTR direction
