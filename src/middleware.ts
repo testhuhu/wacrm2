@@ -39,6 +39,7 @@ export async function middleware(request: NextRequest) {
     supabaseResponse.cookies.getAll().forEach((cookie) => {
       response.cookies.set(cookie)
     })
+    response.headers.set('Vary', 'Cookie, Accept-Language')
     return response
   }
 
@@ -85,6 +86,7 @@ export async function middleware(request: NextRequest) {
     )
   }
 
+  supabaseResponse.headers.set('Vary', 'Cookie, Accept-Language')
   return supabaseResponse
 }
 

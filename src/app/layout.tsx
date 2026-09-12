@@ -83,18 +83,6 @@ const THEME_BOOT_SCRIPT = `
     var MODES = ${JSON.stringify(MODES)};
     var savedMode = localStorage.getItem(MODE_KEY);
     d.dataset.mode = MODES.indexOf(savedMode) !== -1 ? savedMode : MODE_DEFAULT;
-
-    var savedLocale = localStorage.getItem('NEXT_LOCALE') || localStorage.getItem('wacrm_locale');
-    if (savedLocale && (savedLocale === 'ar' || savedLocale === 'tr' || savedLocale === 'en')) {
-      var match = document.cookie.match(/(?:^|;\\s*)NEXT_LOCALE=([^;]+)/);
-      var currentCookieLocale = match ? match[1] : null;
-      if (currentCookieLocale !== savedLocale) {
-        var isSecure = location.protocol === 'https:';
-        var maxAge = 31536000;
-        document.cookie = 'NEXT_LOCALE=' + savedLocale + '; path=/; max-age=' + maxAge + '; SameSite=Lax' + (isSecure ? '; Secure' : '');
-        document.cookie = 'wacrm_locale=' + savedLocale + '; path=/; max-age=' + maxAge + '; SameSite=Lax' + (isSecure ? '; Secure' : '');
-      }
-    }
   } catch (_e) {
     d.dataset.theme = ${JSON.stringify(DEFAULT_THEME)};
     d.dataset.mode = ${JSON.stringify(DEFAULT_MODE)};
